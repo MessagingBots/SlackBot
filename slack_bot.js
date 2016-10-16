@@ -19,5 +19,5 @@ controller.hears('pizza',['direct_mention','direct_message','mention'],function(
 
 //testing if message received?
 controller.on('message_received',function(bot,message){
-  bot.reply("I received a message.");
+  bot.reply(message,"I received a message.");
 });
