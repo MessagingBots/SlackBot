@@ -41,9 +41,10 @@ controller.hears("Hi",['direct_message'],function(bot,message){
   });
 });
 
-controller.hears(['Zach'],'direct_message',apiai.hears,function(bot, message) {
+controller.hears(['what\'s up'],'direct_message',apiai.hears,function(bot, message) {
   bot.reply(message,message.fulfillment.speech);
 });
+
 
 /*
 
