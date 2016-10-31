@@ -56,6 +56,11 @@ for (var i = 0; i < message.entities.intent.length; i++) {
 });
 
 
+//test function
+function echoName(context){
+  
+}
+
 //request schedule
 controller.hears(['schedule'],'direct_message,direct_mention,mention',wit.hears,function(bot,message){
   for(var i = 0; i < message.entities.intent.length; i++){
