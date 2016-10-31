@@ -44,15 +44,29 @@ controller.hears("Hi",['direct_message'],function(bot,message){
 });
 
 
+//greetings
 controller.hears(['name'], 'direct_message,direct_mention,mention', wit.hears, function(bot, message) {
 for (var i = 0; i < message.entities.intent.length; i++) {
   if (message.entities.intent[i].value == 'name'){
-      bot.reply(message, 'Hi ' + message.entities.name_of_person[0].value + '!');
+      if(message.entities.name_of_person){
+        bot.reply(message, 'Hi ' + message.entities.name_of_person[0].value + '!');
+      }
     }
   }
 });
 
-controller.hears(['weather'], 'direct_message,direct_mention,mention', wit.hears, function(bot, message) {
-  console.log(message)
-  bot.reply(message, 'Hello!');
-});
+
+//request schedule
+controller.hears(['schedule'],'direct_message,direct_mention,mention',wit.hears,function(bot,message){
+  for(var i = 0; i < message.entities.intent.length; i++){
+    if(message.entities.intent[i].value == 'schedule'){
+      if(message.entities.schedule_of_person){
+        bot.reply(message, 'schedule of person');
+      }
+    }
+  }
+})
+
+//request emails
+
+//request search
