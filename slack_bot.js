@@ -1,8 +1,50 @@
 //Botkit and APIAI
 var Botkit = require('./node_modules/botkit/lib/Botkit.js');
-var wit = require('botkit-middleware-witai')({
-    token: 'ZJJ5TKZXOVOE72O6STFSWO5YXE5QIRAX'
-});
+// var interactive = require('node-wit').interactive;
+var Wit = require('node-wit').Wit;
+
+var accessToken = 'ZJJ5TKZXOVOE72O6STFSWO5YXE5QIRAX';
+var client = new Wit({accessToken, actions});
+
+const firstEntityValue = (entities, entity) => {
+  console.log('searching through');
+  console.log(entities);
+  console.log('for');
+  console.log(entity);
+  const val = entities && entities[entity] &&
+    Array.isArray(entities[entity]) &&
+    entities[entity].length > 0 &&
+    entities[entity][0].value
+  ;
+  if (!val) {
+    return null;
+  }
+  return typeof val === 'object' ? val.value : val;
+};
+
+var actions = {
+  send(request, response) {
+    const {sessionId, context, entities} = request;
+    const {text, quickreplies} = response;
+    console.log('inside send');
+    return new Promise(function(resolve, reject) {
+      console.log('sending...', JSON.stringify(response));
+      return resolve();
+    });
+  },
+  ['echoName']({context, entities}) {
+    return new Promise(function(resolve, reject) {
+      const name = firstEntityValue(entities, 'name_of_person'));
+      if (name) {
+        context.name = name
+      }
+
+      //call the API here
+      return resolve(context);
+    });
+  },
+};
+
 
 
 //the bot controller with JSON database
@@ -17,61 +59,11 @@ var bot = controller.spawn({
 }).startRTM()
 
 
-
-controller.middleware.receive.use(wit.receive);
-
-
-//Welcoming message
-controller.hears("Hi",['direct_message'],function(bot,message){
-  controller.storage.users.get(message.user,function(err,user){   //greet user if user exists in bot's memorys
-    if(user && user.name){
-      bot.reply(message, "Hi " + user.name + " what can I help you with?");
-    }
-    else{       //else inquire for their name
-        bot.reply(message,"We've never met. What is your name?");
-        controller.hears("(.*)",['direct_message'],function(bot,message){
-          var name = message.match[1];
-          if(!user){
-            user = {        //create user object based on this message's user
-              id : message.user
-            };
-          }
-        user.name = name;     //assign name to this object
-        controller.storage.users.save(user,function(err,id){});
-      })
-    }
-  });
-});
-
-
 //greetings
-controller.hears(['name'], 'direct_message,direct_mention,mention', wit.hears, function(bot, message) {
-for (var i = 0; i < message.entities.intent.length; i++) {
-  if (message.entities.intent[i].value == 'name'){
-      if(message.entities.name_of_person){
-        bot.reply(message, 'Hi ' + message.entities.name_of_person[0].value + '!');
-      }
-    }
-  }
+controller.hears(['name'], 'direct_message,direct_mention,mention', function(bot, message) {
+  client.runActions('swag-420-blaze-it', message.text, context)
+  .then((context)=>{
+    console.log(JSON.stringify(context));
+    bot.reply(message, `hi ${context.name}, i cant blieve how frustraing this is`);
+  })
 });
-
-
-//test function
-function echoName(context){
-
-}
-
-//request schedule
-controller.hears(['schedule'],'direct_message,direct_mention,mention',wit.hears,function(bot,message){
-  for(var i = 0; i < message.entities.intent.length; i++){
-    if(message.entities.intent[i].value == 'schedule'){
-      if(message.entities.schedule_of_person){
-        bot.reply(message, 'schedule of person');
-      }
-    }
-  }
-})
-
-//request emails
-
-//request search
