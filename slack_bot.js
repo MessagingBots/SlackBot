@@ -1,10 +1,14 @@
-//Botkit loaded in
+//Botkit and APIAI
 var Botkit = require('./node_modules/botkit/lib/Botkit.js');
+var wit = require('botkit-middleware-witai')({
+    token: 'ZJJ5TKZXOVOE72O6STFSWO5YXE5QIRAX'
+});
+
 
 //the bot controller with JSON database
 var controller = Botkit.slackbot({
   json_file_store: 'path_to_json_database',
-  debug: true
+  debug: false
 });
 
 //spawn a bot based on the API Token
@@ -12,11 +16,9 @@ var bot = controller.spawn({
   token: 'xoxb-77604885776-8WlYCOYhUOFF3m8XAQTunNAH'
 }).startRTM()
 
-var apiai = require('botkit-middleware-apiai')({
-    token: '8c88f76b8c224b55b7f1e9d33a120a3a'
-});
 
-controller.middleware.receive.use(apiai.receive);
+
+controller.middleware.receive.use(wit.receive);
 
 
 //Welcoming message
@@ -41,16 +43,16 @@ controller.hears("Hi",['direct_message'],function(bot,message){
   });
 });
 
-controller.hears(['what\'s up'],'direct_message',apiai.hears,function(bot, message) {
-  bot.reply(message,message.fulfillment.speech);
+
+controller.hears(['name'], 'direct_message,direct_mention,mention', wit.hears, function(bot, message) {
+for (var i = 0; i < message.entities.intent.length; i++) {
+  if (message.entities.intent[i].value == 'name'){
+      bot.reply(message, 'Hi ' + message.entities.name_of_person[0].value + '!');
+    }
+  }
 });
 
-
-/*
-
-The slack bot should be able to do the following
-  1. when a user requests a pizza:
-  2. query for toppings
-  3. when receive done
-  4. launch up dominos.com
-*/
+controller.hears(['weather'], 'direct_message,direct_mention,mention', wit.hears, function(bot, message) {
+  console.log(message)
+  bot.reply(message, 'Hello!');
+});

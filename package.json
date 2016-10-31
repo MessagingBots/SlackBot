@@ -4,8 +4,7 @@
   "description": "",
   "main": "slack_bot.js",
   "dependencies": {
-    "botkit": "^0.2.2",
-    "botkit-middleware-apiai": "0.0.2"
+    "botkit": "^0.2.2"
   },
   "devDependencies": {},
   "scripts": {
