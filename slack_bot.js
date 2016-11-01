@@ -1,56 +1,7 @@
 //Dependencies
 var Botkit = require('./node_modules/botkit/lib/Botkit.js');
 var Wit = require('node-wit').Wit;
-var accessToken = 'ZJJ5TKZXOVOE72O6STFSWO5YXE5QIRAX';
-var Imap = require('imap');
-var inspect = require('util').inspect;
-var MailListener = require("mail-listener2");
-
-
-var MailListener = require("mail-listener2");
-
-var mailListener = new MailListener({
-  username: 'insert email here'
-  password: 'insert password here'
-  host: "imap.gmail.com",
-  port: 993, // imap port
-  tls: true,
-  connTimeout: 10000, // Default by node-imap
-  authTimeout: 5000, // Default by node-imap,
-  debug: console.log, // Or your custom function with only one incoming argument. Default: null
-  tlsOptions: { rejectUnauthorized: false },
-  mailbox: "INBOX", // mailbox to monitor
-  searchFilter: ["UNSEEN", "FLAGGED"], // the search filter being used after an IDLE notification has been retrieved
-  markSeen: true, // all fetched email willbe marked as seen and not fetched next time
-  fetchUnreadOnStart: true, // use it only if you want to get all unread email on lib start. Default is `false`,
-  mailParserOptions: {streamAttachments: true}, // options to be passed to mailParser lib.
-  attachments: true, // download attachments as they are encountered to the project directory
-  attachmentOptions: { directory: "attachments/" } // specify a download directory for attachments
-});
-
-mailListener.start(); // start listening
-
-// stop listening
-//mailListener.stop();
-
-mailListener.on("server:connected", function(){
-  console.log("imapConnected");
-});
-
-mailListener.on("server:disconnected", function(){
-  console.log("imapDisconnected");
-});
-
-mailListener.on("error", function(err){
-  console.log(err);
-});
-
-
-
-mailListener.on("attachment", function(attachment){
-  console.log(attachment.path);
-});
-
+var accessToken = 'ZF7JJF46I4NA53CXYVA56YLIA7TLQUAT';
 
 
 const firstEntityValue = (entities, entity) => {
@@ -64,6 +15,7 @@ const firstEntityValue = (entities, entity) => {
   return typeof val === 'object' ? val.value : val;
 };
 
+//various actions our bots can take
 var actions = {
   send(request, response) {
     const {sessionId, context, entities} = request;
@@ -81,26 +33,17 @@ var actions = {
         context.name = name
         return resolve(context);
       }else{
-        reject();
+        return reject();
       }
     });
   },
   ['getEmails']({context,entities}){
-    console.log("context");
-    console.log("~~~~~~~~~");
-    console.log(context);
-    console.log("Entities");
-    console.log("~~~~~~~~~");
-    console.log(entities);
+    console.log(context)
     return new Promise(function(resolve,reject){
-      const email = firstEntityValue(entities, 'wit/email');
-      if(email){
-        context.email = email;
+      if(context){
         return resolve(context);
-      }else{
-        return reject();
       }
-    });
+    })
   }
 };
 
@@ -116,20 +59,60 @@ var bot = controller.spawn({                    //spawn a bot based on the API T
 }).startRTM()
 
 
+
+//help
+controller.hears(['help'],'direct_message,direct_mention,mention,ambient',function(bot, message){
+  controller.storage.users.get(message.user,function(err,user){
+    if(!user){
+      bot.startConversation(message, function(err, convo){
+      convo.ask("what is your name?", function(response,convo){
+        user = {
+          id : message.user
+        }
+        user.name = response.text
+        convo.next();
+      })
+      convo.ask("What is your email?",function(response,convo){
+        user.email = response.text
+        controller.storage.users.save(user);
+        convo.next();
+      })
+    });
+    }else{
+      bot.reply(message,"What can I do for you " + user.name + "?");
+      bot.reply(message,"You can ask for...");
+      bot.reply(message,"For your emails");
+      bot.reply(message,"More functionality coming later");
+    }
+  });
+});
+
+
+
+
 //greetings
 controller.hears(['name'], 'direct_message,direct_mention,mention', function(bot, message) {
-  client.runActions('greetings', message.text,{})
+  client.runActions('420-blaze-it-410', message.text,{})
   .then((context)=>{
     console.log(JSON.stringify(context));
     bot.reply(message, `hi ${context.name}, i cant blieve how frustraing this is`);
+  })
+  .catch((err)=>{
+    bot.reply(message,"Sorry I had a hard time hearing that");
   })
 });
 
 //emails
 controller.hears(['emails'],'direct_message,direct_mention,mention', function(bot,message){
-  client.runActions('emails', message.text, {})
+  client.runActions('emails-WHY-THIS-ISNT-WORKING', message.text, {})
     .then((context)=>{
       console.log(JSON.stringify(context));
       bot.reply(message,"GETTING EMAILS");
     })
-})
+    .catch((err)=>{
+      console.log("Error");
+      bot.reply(message, "Received an error getting emails");
+    })
+});
+
+//courses
