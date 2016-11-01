@@ -5,7 +5,7 @@
   "main": "slack_bot.js",
   "dependencies": {
     "botkit": "^0.2.2",
-    "botkit-middleware-witai": "0.0.2",
+    "mail-listener2": "^0.2.0",
     "node-wit": "^4.1.0"
   },
   "devDependencies": {},
