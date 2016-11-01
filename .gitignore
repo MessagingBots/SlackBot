@@ -1,0 +1,10 @@
+<<<<<<< HEAD
+/node_modules
+npm-debug.log
+=======
+*.txt
+/node_modules
+npm-debug.log
+.DS_Store
+/*.env
+>>>>>>> 0b623e0dd899e0ad8a66df3d118ca5d596bc7639
