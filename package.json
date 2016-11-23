@@ -5,7 +5,9 @@
   "main": "slack_bot.js",
   "dependencies": {
     "botkit": "^0.2.2",
+    "http-proxy": "^1.15.2",
     "mail-listener2": "^0.2.0",
+    "node-gmail-api": "^0.6.0",
     "node-wit": "^4.1.0"
   },
   "devDependencies": {},
