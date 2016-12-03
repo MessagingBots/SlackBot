@@ -2,13 +2,33 @@
 var Botkit = require('./node_modules/botkit/lib/Botkit.js');
 var Wit = require('node-wit').Wit;
 const https = require('https')
-const  request = require('request')
+const  rp = require('request-promise')
 const path = require('path')
 const  httpProxy = require('http-proxy')
 
 //tokens
 var accessToken = 'ZF7JJF46I4NA53CXYVA56YLIA7TLQUAT';
 var CANVAS_API = '1016~QaR4TkJeM3d4DH5qsGqCFVSKILnAjS9wFiU2TVdU9nhjBoXUfUhvYeH2dY5Nz1kM';
+var canvasToken = '1016~QaR4TkJeM3d4DH5qsGqCFVSKILnAjS9wFiU2TVdU9nhjBoXUfUhvYeH2dY5Nz1kM';
+
+//course request options
+var courseOptions = {
+  uri: 'https://canvas.instructure.com/api/v1/courses?&access_token=',
+  qs: {
+    access_token: canvasToken,
+  },
+  method: 'GET'
+}
+
+//announcement request options
+var announcementOptions = {
+  uri:  'https://canvas.instructure.com/api/v1/courses/?&access_token=?course_id=/gradebook_history/days',
+  qs: {
+    access_token: canvasToken,
+    course_id: '10160000000332596',
+  },
+  method: 'GET'
+}
 
 //Helper function for action commands
 const firstEntityValue = (entities, entity) => {
@@ -159,50 +179,51 @@ controller.hears(['courses'],'direct_message,direct_mention,mention', function(b
           bot.reply(message, "Sorry, no account was recognized for you. Type 'help' to create a user");
         }
         else{
-          request({
-            uri: 'https://canvas.instructure.com/api/v1/courses?&access_token=',
-            qs: {
-              access_token: '1016~QaR4TkJeM3d4DH5qsGqCFVSKILnAjS9wFiU2TVdU9nhjBoXUfUhvYeH2dY5Nz1kM'
-            },
-            method: 'GET',
-            json: {}
-          }, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-              var courses;
-              var attachments;
-              var count = 1;
-              console.log(body)
-              //aggregate the courses
-              for( i = 0; i < 5; i++){
-                var word = String(body[i].name);
-                if(word != "undefined"){
-                  //structure the attachments
-                  attachments = {
-                    "attachments" : [
-                      {
-                        "color" : "#B5CEFF",
-                        "fields"  : [
-                          {
-                            "title" : String(body[i].name),
-                            "short" : false,
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                  bot.reply(message,attachments);
+          rp(courseOptions)
+            .then((body)=>{
+              var parsedResponse = JSON.parse(body);
+              console.log(parsedResponse);
+              for(var i = 0; i < 4; i++){
+                if(typeof parsedResponse[i].name != undefined){
+                  bot.reply(message,String(parsedResponse[i].name));
+
                 }
               }
-            } else {
-              console.log("Error");
-            }
-          });
-          bot.reply(message, "Getting courses for: " + user.name);
+            })
+            .catch((err)=>{
+              console.log(err);
+            })
         }
-      })
+      });
     })
     .catch((err)=>{
-      console.log("Error");
+      console.log(err);
+      bot.reply(message, "Received an error getting courses");
+    })
+});
+
+
+//announcements
+controller.hears(['announcements'],'direct_message,direct_mention,mention', function(bot,message){
+  client.runActions('courses-WHY-THIS-ISNT-WORKING', message.text, {})
+    .then((context)=>{
+      controller.storage.users.get(message.user,function(err,user){
+        if(err && !user){
+          bot.reply(message, "Sorry, no account was recognized for you. Type 'help' to create a user");
+        }
+        else{
+          rp(announcementOptions)
+            .then((body)=>{
+              console.log(JSON.parse(body));
+            })
+            .catch((err)=>{
+              console.log(err);
+            })
+        }
+      });
+    })
+    .catch((err)=>{
+      console.log(err);
       bot.reply(message, "Received an error getting courses");
     })
 });
